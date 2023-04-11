@@ -372,6 +372,7 @@ import moment from "moment";
                               // onChange={(e) => {
                               //   setAmountInUSD(Math.abs(e.target.value));
                               // }}
+                              
                               step="any"
                               min="0"
                             />{" "}
