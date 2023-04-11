@@ -119,7 +119,7 @@ contract Project{
     
     //Contribution amount
     function contribution(address _contributor)public _validateExpiryForFunding(Types.ProjectStates.Fundraising) payable{
-        require(msg.value>=minimumContribution,'Contribution amount too low !');
+        require(msg.value>minimumContribution && msg.value<=(targetAmount/2),'Contribution amount too low !');
         if(contributorsList[_contributor]==0){
             numberOfContributors++;
         }
@@ -131,7 +131,7 @@ contract Project{
 
     //Checking campaign funding status
     //check if campaign has got complete funding
-    //check if deadline of campaign is passed
+    //check if deadline of campaign is passed 
     function checkCampaignStatus()internal{
         if(raisedAmount>=targetAmount){
             ProjectCurrentState=Types.ProjectStates.Successfull;
@@ -154,7 +154,7 @@ contract Project{
 
     //Request for funds from front end
     function createFundRequest(string memory _description,string memory _IPFSfileHash, uint256 _amount,address payable _reciptent)public _isCreater() _validateExpiry(Types.ProjectStates.Successfull){
-        require(timeline.length>=numOfWithdrawRequests,'Cannot withdraw funds all request has been completed' );
+        require((timeline.length*2)>=numOfWithdrawRequests,'Cannot withdraw funds all request has been completed' );
         // require(timeline[numOfWithdrawRequests]<=block.timestamp,'The timeline passed');
         withdrawRequest storage newRequest=withdrawRequests[numOfWithdrawRequests];
         
@@ -198,6 +198,7 @@ contract Project{
         require(RequestDetails.isCompleted==false,'Request Completed already');
         require(RequestDetails.noOfVotes>numberOfContributors/2,'Vote percentage is less than 50% cannot withdraw fund');
         RequestDetails.reciptent.transfer(RequestDetails.amount);
+        raisedAmount=raisedAmount-RequestDetails.amount;
         RequestDetails.isCompleted=true;
         emit WithdrawlSuccessful(
             _requestID,
