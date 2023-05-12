@@ -36,7 +36,7 @@ import moment from "moment";
         balance:project.currentAmount,
         currentUserAddress:getWalletAddress,
         //  getCampaigndetails[4],
-        state:project.state,
+        projectState:project.state,
         //  state[getCampaigndetails[2]],
         fundraisingDeadline:project.deadline,
         //  getCampaigndetails[7],
@@ -103,7 +103,7 @@ import moment from "moment";
     id,
     minimumContribution,
     balance,
-    state,
+    projectState,
     currentUserAddress,
     manager,
     name,
@@ -118,13 +118,14 @@ import moment from "moment";
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [error, setError] = useState("");
     const [amountInUSD, setAmountInUSD] = useState();
-    // const wallet = useWallet();
+
     const router = useRouter();
     const { width, height } = useWindowSize();
     const dateFundRaisingDL=new Date(fundraisingDeadline);
     const deadlineUnixFormat=dateFundRaisingDL.getTime();
-    // moment(dateFundRaisingDL.getTime()).unix;
-    console.log(deadlineUnixFormat/1000);
+    
+    
+    
     async function onSubmit(data) {
       try {
         // const campaign = Campaign(id);
@@ -148,7 +149,8 @@ import moment from "moment";
         console.log(err);
       }
     }
-
+    // console.log(manager.toLowerCase()!= userWalletAdd);
+    // console.log(userWalletAdd);
     return (
         <div top='40px'>
           <Head>
@@ -227,7 +229,7 @@ import moment from "moment";
                       />
                       <StatsCard
                         title={"Project State"}
-                        stat={state}
+                        stat={projectState}
                         info={
                           "Current State of project"
                         }
@@ -341,8 +343,12 @@ import moment from "moment";
                     </Stat>
                   </Box>
                
-               {(deadlineUnixFormat) > (Date.now()) ?(
-               <Stack
+               {(deadlineUnixFormat) > (Date.now()) || projectState!="Successful"?(
+                
+                manager.toLowerCase()!= walletAddress?
+                
+                
+              ( <Stack
                     bg={useColorModeValue("white", "gray.700")}
                     boxShadow={"lg"}
                     rounded={"xl"}
@@ -443,7 +449,20 @@ import moment from "moment";
                           </Stack>
                       </form>
                     </Box>
-                  </Stack>
+                  </Stack>):
+                 ( <Stack
+                  bg={useColorModeValue("white", "gray.700")}
+                  boxShadow={"lg"}
+                  rounded={"xl"}
+                  p={{ base: 4, sm: 6, md: 8 }}
+                  spacing={{ base: 6 }}
+                  >
+                    <Heading
+                    size={5}
+                    >
+                    You are Campaign Creator
+                    </Heading>
+                  </Stack>)
                   ) 
                  : (  <Stack
                     bg={useColorModeValue("white", "gray.700")}
@@ -453,9 +472,9 @@ import moment from "moment";
                     spacing={{ base: 6 }}
                     >
                       <Heading
-                      
+                      size={5}
                       >
-                        The Campaign is Closed!!!
+                        The Campaign is Closed
                       </Heading>
                     </Stack>
                   )}

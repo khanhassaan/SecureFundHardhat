@@ -19,6 +19,7 @@
     "ethers": "^6.0.2",
     "framer-motion": "^9.0.2",
     "next": "13.1.6",
+    "nft.storage": "^7.0.3",
     "react": "18.2.0",
     "react-confetti": "^6.1.0",
     "react-dom": "18.2.0",
@@ -26,7 +27,6 @@
     "react-icons": "^4.7.1",
     "react-use": "^17.4.0",
     "styled-components": "^5.3.6",
-    "use-wallet": "^0.13.6",
     "web3": "^1.8.2"
   },
   "devDependencies": {

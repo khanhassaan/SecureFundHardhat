@@ -23,7 +23,7 @@ import {
   WarningIcon,
 } from "@chakra-ui/icons";
 import Web3 from "web3";
-import { getAllWithdrawRequest, getProjectInformation, getRequestCount, getVoteCount, loadProjectContract, voteWithdrawRequest } from "../../../../utils/interaction";
+import { getAllWithdrawRequest, getProjectInformation, getRequestCount, getVoteCount, loadProjectContract, voteWithdrawRequest,withdrawFundsFromContract  } from "../../../../utils/interaction";
 
 
 
@@ -53,14 +53,14 @@ const RequestRow = ({
   disabled,
 }) => {
   const router = useRouter();
-  const readyToFinalize = request.approvalCount > approversCount / 2;
+  const readyToFinalize = request.totalVote  > approversCount / 2;
   const [errorMessageApprove, setErrorMessageApprove] = useState();
   const [loadingApprove, setLoadingApprove] = useState(false);
   const [errorMessageFinalize, setErrorMessageFinalize] = useState();
   const [loadingFinalize, setLoadingFinalize] = useState(false);
 
 
-
+  // Approve For Funds
   const onApprove = async () => {
     setLoadingApprove(true);
     try {
@@ -76,12 +76,14 @@ const RequestRow = ({
 
   const onFinalize = async () => {
     setLoadingFinalize(true);
-    try {
+    try { // console.log(results);
       // const campaign = Campaign(campaignId);
       // const accounts = await web3.eth.getAccounts();
       // await campaign.methods.  (id).send({
       //   from: accounts[0],
       // });
+      const accountAdd=await window.ethereum.request({method : "eth_requestAccounts"});
+      await withdrawFundsFromContract(campaignId,id,accountAdd[0]);
       router.reload();
     } catch (err) {
       setErrorMessageFinalize(err.message);
@@ -93,11 +95,11 @@ const RequestRow = ({
   return (
     <Tr
       bg={
-        readyToFinalize && !request.complete
+        readyToFinalize && !request.isCompleted
           ? useColorModeValue("teal.100", "teal.700")
           : useColorModeValue("gray.100", "gray.700")
       }
-      opacity={request.complete ? "0.4" : "1"}
+      opacity={request.isCompleted ? "0.4" : "1"}
     >
       <Td>{id} </Td>
       <Td>{request.desc}</Td>
@@ -114,6 +116,7 @@ const RequestRow = ({
           {" "}
           {request.ipfslink.substr(0, 20) + "..."}
         </Link>
+        {/* <a href={`${request.ipfslink }`}>{`${request.ipfslink }`}</a> */}
       </Td>
       <Td>
         {request.totalVote}/{parseFloat(approversCount)}
@@ -132,7 +135,7 @@ const RequestRow = ({
               display={errorMessageApprove ? "inline-block" : "none"}
             />
           </Tooltip>
-          {request.complete ? (
+          {request.isCompleted ? (
             <Tooltip
               label="This Request has been finalized & withdrawn to the recipient,it may then have less no of approvers"
               bg={useColorModeValue("white", "gray.700")}
@@ -153,7 +156,7 @@ const RequestRow = ({
                 color: "white",
               }}
               onClick={onApprove}
-              isDisabled={disabled || request.approvalCount == approversCount}
+              isDisabled={disabled || request.totalVote== approversCount}
               isLoading={loadingApprove}
             >
               Approve
@@ -175,7 +178,7 @@ const RequestRow = ({
             mr="2"
           />
         </Tooltip>
-        {request.complete ? (
+        {request.isCompleted ? (
           <Tooltip
               label="This Request has been finalized & withdrawn to the recipient,it may then have less no of approvers"
             bg={useColorModeValue("white", "gray.700")}
@@ -196,7 +199,7 @@ const RequestRow = ({
                 bg: "green.600",
                 color: "white",
               }}
-              isDisabled={disabled || (!request.complete && !readyToFinalize)}
+              isDisabled={disabled || (!request.isCompleted && !readyToFinalize)}
               onClick={onFinalize}
               isLoading={loadingFinalize}
             >
@@ -214,7 +217,7 @@ const RequestRow = ({
                 as="span"
                 color={useColorModeValue("teal.800", "white")}
                 display={
-                  readyToFinalize && !request.complete ? "inline-block" : "none"
+                  readyToFinalize && !request.isCompleted ? "inline-block" : "none"
                 }
               />
             </Tooltip>
@@ -358,7 +361,9 @@ export default function ShowWithdrawlRequest (
                 </Thead>
                 <Tbody>
                   {requestsList.map((request, index) => {
+                    console.log(request)
                     return (
+                      
                       <RequestRow
                         key={index}
                         id={index}

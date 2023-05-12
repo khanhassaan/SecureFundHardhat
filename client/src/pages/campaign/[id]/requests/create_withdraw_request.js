@@ -6,13 +6,12 @@ import { useRouter } from "next/router";
 import { useState } from "react"
 import {
     Box,FormControl,FormLabel,Input,Stack,Button,Heading,Text,useColorModeValue,InputRightAddon,InputGroup,Alert,AlertIcon,
-    AlertDescription,FormErrorMessage,FormHelperText,Textarea
+    AlertDescription,FormErrorMessage,FormHelperText,Textarea, InputAddon, InputRightElement
   } from "@chakra-ui/react";
-
-  import { useAsync } from "react-use";
+import { NFTStorage } from 'nft.storage'
+import { useAsync } from "react-use";
 import { createNewWithdrawRequest, createWithdrawRequest, walletAddress } from "../../../../utils/interaction";
 import Web3 from "web3";
-
 
 //   export async function getServerSideProps({params}){
 //     const campaignId=params.id;
@@ -22,6 +21,15 @@ import Web3 from "web3";
 //         }
 //     }
 //   }
+
+
+
+const API_TOKEN =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDEzQzRiMkIzNkJDMzU2NjJGQmU3QTE4NzYwQkViMjZGODkwMGRCNDYiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY4MjUwODQyNDM0OCwibmFtZSI6IkxZIFByb2plY3QifQ.GDav0yxBaEQZ24ggwXtlI-1ViWvXefS2iwYB1RVv7vo";
+
+const NFT_STORAGE_CLIENT=new NFTStorage({
+  token:API_TOKEN
+})
 
 
 
@@ -38,6 +46,14 @@ import Web3 from "web3";
       mode: "onChange",
     });
     const [error, setError] = useState("");
+
+    //File handling related hooks 
+    // setting and getting files
+    const [loadingIPFS,setIPFSLoading]=useState(false);
+    const[uploaded,setUploaded]=useState(false);
+    const[file, setFile]=useState(null);
+    const[ifpsURL,setIPFSurl]=useState();
+
     // // const [inUSD, setInUSD] = useState();
     // // const [ETHPrice, setETHPrice] = useState(0);
     // useAsync(async () => {
@@ -49,14 +65,15 @@ import Web3 from "web3";
     //   }
     // }, []);
     async function onSubmit(data) {
-        console.log(id)
-      console.log(data);
-      console.log(Web3.utils.toWei(data.value));
-    //   const campaign = Campaign(id);
+      // console.log(id)
+      // console.log(data);
+      // console.log(Web3.utils.toWei(data.value));
+      //   const campaign = Campaign(id);
+      console.log(ifpsURL);
       try {
-        const accountAdd=await window.ethereum.request({method : "eth_requestAccounts"});
+      const accountAdd=await window.ethereum.request({method : "eth_requestAccounts"});
       console.log(accountAdd[0]);
-      const IPFSFilehash='file:///C:/Users/ASUS/Downloads/MANIFEST-0153.pdf';
+      const IPFSFilehash=ifpsURL;
       await createNewWithdrawRequest(id,Web3.utils.toWei(data.value),accountAdd[0],IPFSFilehash,data.description)
         router.push(`/campaign/${id}`);
       } catch (err) {
@@ -64,7 +81,21 @@ import Web3 from "web3";
         console.log(err);
       }
     }
-  
+
+    const fileHandler=(e)=>{
+      console.log(e.target.files[0]);
+      setFile(e.target.files[0]);
+      setUploaded(false);
+    }
+  async function uploadToIPFS(data){
+    setIPFSLoading(true);
+    console.log("called");
+    const cid=await NFT_STORAGE_CLIENT.storeBlob(file);
+    console.log("https://"+cid+".ipfs.nftstorage.link");
+    setIPFSurl("https://"+cid+".ipfs.nftstorage.link");
+    setIPFSLoading(false)
+    setUploaded(true);
+  }
     return (
       <div>
         <Head>
@@ -124,6 +155,7 @@ import Web3 from "web3";
                     <FormLabel htmlFor="recipient">
                       Recipient Ethereum Wallet Address
                     </FormLabel>
+                    
                     <Input
                       name="recipient"
                       {...register("recipient", {
@@ -136,7 +168,10 @@ import Web3 from "web3";
                     <FormLabel htmlFor="pdfFile">
                       Choose File
                     </FormLabel>
+                  
+                   
                     <Input
+                      
                       name="pdfFile"
                       {...register("pdfFile", {
                         required: false,
@@ -144,17 +179,23 @@ import Web3 from "web3";
                       isDisabled={isSubmitting}
                       type="file"
                       accept="application/pdf"
-
+                      onChange={fileHandler}
+                      
                     />
+                    
+                    
                   </FormControl>
+                  
                   <Button
                         bg={"teal.400"}
                         color={"white"}
                         _hover={{
                           bg: "teal.500",
                         }}
-                        isDisabled={isSubmitting}
+                        isLoading={loadingIPFS}
+                        isDisabled={uploaded}
                         type="button"
+                        onClick={uploadToIPFS}
                       >
                         Upload File to IPFS
                       </Button>
@@ -181,6 +222,7 @@ import Web3 from "web3";
                         _hover={{
                           bg: "teal.500",
                         }}
+                        isDisabled={!uploaded}
                         isLoading={isSubmitting}
                         type="submit"
                       >

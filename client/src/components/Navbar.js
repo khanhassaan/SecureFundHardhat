@@ -5,22 +5,40 @@ import {
 import NextLink from "next/link";
 import DarkModeSwitch from "./DarkModeSwitch";
 import { ChevronDownIcon } from "@chakra-ui/icons";
-import React, {useState} from "react";
+import React, {useState,useEffect} from "react";
 import Web3 from 'web3';
+import { Router } from "next/router";
 export default function NavBar() {
     const [address,setAddress] = useState('');
     const [balance,setBalance] = useState('');
-  
+    var Eth=require('web3-eth');
+    var eth = new Eth(Eth.givenProvider);
     const connectToWallet= async()=>{
+    //   var Eth=require('web3-eth');
+    // var eth = new Eth(Eth.givenProvider);
       const accountAdd=await window.ethereum.request({method : "eth_requestAccounts"});
-  
-      var Eth=require('web3-eth');
-      var eth = new Eth(Eth.givenProvider);
+     
       const bal=Web3.utils.fromWei(await eth.getBalance(accountAdd[0]));
       setAddress(accountAdd[0]);
       setBalance(bal);
       
    }
+   useEffect(() => {
+    
+    async function listenMMAccount() {
+      const accountAdd=await window.ethereum.request({method : "eth_requestAccounts"});
+        setAddress(accountAdd[0]);
+        const bal=Web3.utils.fromWei(await eth.getBalance(accountAdd[0]))
+        setBalance(bal);
+      window.ethereum.on("accountsChanged", async function() {
+        // Time to reload your interface with accounts[0]!
+        
+       
+        window.location.reload();
+      });
+    }
+    listenMMAccount();
+  }, [])
 
   return (
     <Box>

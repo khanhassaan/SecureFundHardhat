@@ -310,8 +310,8 @@ export default function Home({campaigns}) {
         {campaignList.length > 0  ? (
           <SimpleGrid columns={{ base: 1, md: 4 }} spacing={10} py={8}>
             {campaignList.map((el, i) => {
-              const fundraisingDl=moment(el.deadline).unix();
-              if (parseInt(el.goalAmount)<=parseInt(el.currentAmount) && (Date.now()/1000)>=fundraisingDl) {
+              
+              if (el.state==="Successful" ) {
                 return (
                   <div key={i}>
                     <CampaignCard
@@ -351,7 +351,7 @@ export default function Home({campaigns}) {
             {campaignList.map((el, i) => {
               const fundraisingDl=moment(el.deadline).unix();
               
-              if (parseInt(el.goalAmount)>parseInt(el.currentAmount) &&(Date.now()/1000) > fundraisingDl) {
+              if (parseInt(el.goalAmount)>parseInt(el.currentAmount) &&(Date.now()/1000) > fundraisingDl && el.state!="Successful") {
                 
                 return (
                   <div key={i}>

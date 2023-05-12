@@ -3,7 +3,8 @@ import CrowdFund from '../../artifacts/contracts/CrowdFund.sol/CrowdFund.json';
 import Project from '../../artifacts/contracts/Project.sol/Project.json';
 import { projectDataFormatter, withdrawRequestDataFormatter } from "./helper";
 
-const crowdFundingContractAddress ="0xD6A108A2E80367073D418F40Aa04cFA866b0969e";
+const crowdFundingContractAddress ="0xD0b8739F0eC9fae20f636b328FD5D01503dEe859"
+// "0xD6A108A2E80367073D418F40Aa04cFA866b0969e";
 // "0xAd4dea702670DCFAFE7D4Ce45Fc2b6717D4412DE";
 // "0xec906776F55796665906c5eb4E25cfD89C3Fb3fF";
 // "0x13c3bb6C95b031a8edD3a0d1a787E54b2d411faf";
@@ -126,7 +127,23 @@ export const getVoteCount=async(projectID)=>{
 
 export const voteWithdrawRequest = async (projectID,reqId,account) =>{
   var projectConnector = new web3.eth.Contract(Project.abi,projectID);
-  await projectConnector.methods.voteWithdrawRequest(reqId).send({from:account})
+ const request= await projectConnector.methods.VoteForWithdrawal(reqId).send({from:account})
+  .on('error', function(error){ 
+    console.log(error);
+  })
+  console.log(request);
 
 
 }
+
+export const withdrawFundsFromContract=async (projectID,requestID,accountAdd)=>{
+  
+  var projectConnector = new web3.eth.Contract(Project.abi,projectID);
+  const  fundReleased=await projectConnector.methods.WithdrawRequestedAmount(requestID).send({from:accountAdd})
+  .on('error', function(error){ 
+    console.log(error);
+  });
+  console.log(fundReleased);
+}
+
+

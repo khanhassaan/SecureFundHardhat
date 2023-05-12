@@ -43,7 +43,7 @@ export default function CampaignCreated  () {
             transform: "translateY(-8px)",
           }}
         >
-          <Box height="18em">
+          <Box height="12em">
             <Img
               src={imageURL}
               alt={`Picture of ${name}`}
@@ -106,11 +106,7 @@ export default function CampaignCreated  () {
                   maxW={{ base: "	15rem", sm: "sm" }}
                   pt="2"
                 >
-                  <Text as="span" fontWeight={"bold"}>
-                    {balance > 0
-                      ? balance
-                      : "0, Become a Donor 😄"}
-                  </Text>
+                  
                   <Text
                     as="span"
                     display={balance > 0 ? "inline" : "none"}
@@ -157,26 +153,36 @@ export default function CampaignCreated  () {
   
   
 
-
-
+  const [userAdd, setUserAdd]=useState();
+  const [campaignList, setCampaignList] = useState([]);
   async function getCampaigns() {
     try {
-      const getCampaigndetails= await getAllFunding();
       const userAddress=await walletAddress();
-      console.log(getCampaigndetails);
+      setUserAdd(userAddress)
+      const getCampaigndetails= await getAllFunding();
+      setCampaignList(getCampaigndetails);
+      // console.log("Here "+campaignList);
+      // console.log(getCampaigndetails);
+      
+      // console.log(getCampaigndetails);
       // console.log(getCampaigndetails);
       // const ETHPrice = await getETHPrice();
       // updateEthPrice(ETHPrice);
       // if (getCampaigndetails.creatorId) {
         
       // }
-      // console.log(userAddress);
-      getCampaigndetails.map((el,i)=>{
-        if (el.creator==userAddress) {
-          setCampaignList(getCampaigndetails);    
-        }
-      })
-      
+      // var j=0;
+      // getCampaigndetails.map((el,i)=>{
+      //   if (String(el.creator)===String(userAddress)) {
+      //     // userCreatedCampigns.set 
+
+      //     console.log(campaignList[i]);    
+      //     // console.log(getCampaigndetails[i]);    
+      //     // console.log(i);
+        
+      //   }
+      // })
+      // console.log(campaignList);
       
 
       return getCampaigndetails;
@@ -192,7 +198,7 @@ export default function CampaignCreated  () {
   }, [])
   
   
-  const [campaignList, setCampaignList] = useState([]);
+ 
   return (
     <div>
       <main className={styles.main}>
@@ -215,27 +221,32 @@ export default function CampaignCreated  () {
         <Divider marginTop="4" />
 
         {campaignList.length > 0 ? (
-          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={10} py={8}>
+          <SimpleGrid columns={{ base: 1, md: 4 }} spacing={10} py={8}>
             {campaignList.map((el, i) => {
-              return (
-                <div key={i}>
-                  <CampaignCard
-                    name={el.title}
-                    description={el.description}
-                    creatorId={el.creator}
-                    imageURL={'https://cdn.shopify.com/s/files/1/0070/7032/files/BestCrowdfundingSites_resized-03.jpg?v=1628129221&width=1024'}
-                    id={el.address}
-                      // campaigns[i]}
-                    target={el.goalAmount}
-                    balance={el.currentAmount}
-                    // ethPrice={ethPrice}
-                  />
-                </div>
-              );
+              
+                if (userAdd===el.creator) {
+                  return (
+                    <div key={i}>
+                      <CampaignCard
+                        name={el.title}
+                        description={el.description}
+                        creatorId={el.creator}
+                        imageURL={'https://cdn.shopify.com/s/files/1/0070/7032/files/BestCrowdfundingSites_resized-03.jpg?v=1628129221&width=1024'}
+                        id={el.address}
+                          // campaigns[i]}
+                        target={el.goalAmount}
+                        balance={el.currentAmount}
+                        // ethPrice={ethPrice}
+                      />
+                    </div>
+                  );  
+                
+                }
+              
             })}
           </SimpleGrid>
         ) : (
-          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={10} py={8}>
+          <SimpleGrid columns={{ base: 1, md: 4 }} spacing={10} py={8}>
             <Skeleton height="25rem" />
             <Skeleton height="25rem" />
             <Skeleton height="25rem" />
